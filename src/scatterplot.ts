@@ -56,6 +56,7 @@ export class Scatterplot {
   public secondary_renderers: Record<string, Renderer> = {};
   public div?: Selection<BaseType | HTMLDivElement, number, BaseType, unknown>;
   public bound: boolean;
+  public is_rendering: boolean;
   //  d3 : Object;
   public _zoom?: Zoom;
   // The queue of draw calls are a chain of promises.
@@ -111,6 +112,7 @@ export class Scatterplot {
       arrow_table,
     } = options;
     this.bound = false;
+    this.is_rendering = false;
     if (selector !== undefined) {
       this.bind(selector, width, height);
     }
@@ -513,6 +515,42 @@ export class Scatterplot {
 
     const node = this.div?.node() as Node;
     node.parentElement.replaceChildren();
+  }
+
+  /**
+   * Pause the rendering loop.
+   */
+  public pause() {
+    if (this._renderer && this._renderer.reglframe) {
+      this._renderer.reglframe.cancel();
+      this._renderer.reglframe = undefined;
+      this.is_rendering = false;
+    }
+    for (const k in this.secondary_renderers) {
+      (this.secondary_renderers[k] as LabelMaker).stop();
+    }
+  }
+
+  /**
+   * Resume the rendering loop.
+   */
+  public resume() {
+    if (this._renderer && !this._renderer.reglframe) {
+      this._renderer.reglframe = this._renderer.regl.frame(() => {
+        this._renderer.tick();
+      });
+      this.is_rendering = true;
+    }
+    for (const k in this.secondary_renderers) {
+      (this.secondary_renderers[k] as LabelMaker).start();
+    }
+  }
+
+  /**
+   * Check if the scatterplot is currently rendering.
+   */
+  public isRendering(): boolean {
+    return this.is_rendering;
   }
 
   update_prefs(prefs: DS.APICall) {
