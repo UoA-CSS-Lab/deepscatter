@@ -759,6 +759,7 @@ export class Deeptable {
     fields: string[] = ['x', 'y', 'ix'],
     priority: 'high' | 'low' = 'high',
   ): boolean {
+    queue_length = 16;
     /*
       Browsing can spawn a  *lot* of download requests that persist on
       unneeded parts of the deeptable. So the deeptable handles its own queue for dispatching
