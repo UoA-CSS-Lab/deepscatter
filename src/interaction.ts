@@ -14,7 +14,7 @@ import { Rectangle } from './tile';
 import type { Deeptable } from './Deeptable';
 import type * as DS from './types';
 import type { Scatterplot } from './scatterplot';
-import { PositionalAesthetic } from './aesthetics/ScaledAesthetic';
+import { PositionalAesthetic, ScaledAesthetic } from './aesthetics/ScaledAesthetic';
 import { Qid } from './tixrixqid';
 import { isConstantChannel, isLambdaChannel } from './typing';
 type Annotation = {
@@ -204,7 +204,7 @@ export class Zoom {
 
     const annotations: Annotation[] = data.map((d, i) => {
       // Get size multiplier from size aesthetic if available
-      let size_multiplier = DEFAULT_SIZE_MULTIPLIER; // default value
+      let size_multiplier = (this.scatterplot.dim['size'] as ScaledAesthetic).default_constant as number; // default value
 
       const size = this.scatterplot.prefs.encoding.size;
 
