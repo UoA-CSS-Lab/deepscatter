@@ -206,7 +206,7 @@ export class Zoom {
       // Get size multiplier from size aesthetic if available
       let size_multiplier = DEFAULT_SIZE_MULTIPLIER; // default value
 
-      const size = this.prefs.encoding.size;
+      const size = this.scatterplot.prefs.encoding.size;
 
       if (isConstantChannel(size)) {
         size_multiplier *= size.constant;
