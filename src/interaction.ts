@@ -14,8 +14,9 @@ import { Rectangle } from './tile';
 import type { Deeptable } from './Deeptable';
 import type * as DS from './types';
 import type { Scatterplot } from './scatterplot';
-import { PositionalAesthetic } from './aesthetics/ScaledAesthetic';
+import { PositionalAesthetic, ScaledAesthetic } from './aesthetics/ScaledAesthetic';
 import { Qid } from './tixrixqid';
+import { isConstantChannel, isLambdaChannel } from './typing';
 type Annotation = {
   x: number;
   y: number;
@@ -23,6 +24,7 @@ type Annotation = {
   dy: number;
   data: StructRowProxy;
   qid: Qid;
+  pointSize: number;
 };
 
 // A collection of zoomed and unzoomed scales returned by the interaction component.
@@ -188,18 +190,41 @@ export class Zoom {
     const { x_, y_ } = this.scales();
     const xdim = this.scatterplot.dim('x') as PositionalAesthetic;
     const ydim = this.scatterplot.dim('y') as PositionalAesthetic;
-    
+
     const data = this.scatterplot.deeptable.getQids(dd)
     this.scatterplot.highlit_point_change(dd, this.scatterplot);
 
+    // Calculate zoom adjustment for point size
+    const k = this.transform?.k || 1;
+    const zoom_balance = this.scatterplot.prefs.zoom_balance || 0.66;
+    const point_size_adjust = Math.exp(Math.log(k) * zoom_balance);
+
+    // Get base point size from preferences
+    const base_size = this.scatterplot.prefs.point_size || 1;
+
     const annotations: Annotation[] = data.map((d, i) => {
+      // Get size multiplier from size aesthetic if available
+      let size_multiplier = (this.scatterplot.dim['size'] as ScaledAesthetic).default_constant as number; // default value
+
+      const size = this.scatterplot.prefs.encoding.size;
+
+      if (isConstantChannel(size)) {
+        size_multiplier *= size.constant;
+      } else if (isLambdaChannel(size)) {
+        size_multiplier *= Math.sqrt(Number(d[size.field]));
+      }
+
+      // Calculate actual point size used in rendering
+      const actual_point_size = point_size_adjust * base_size * size_multiplier;
+
       return {
         x: x_(xdim.apply(d)),
         y: y_(ydim.apply(d)),
         data: d,
         dx: 0,
         dy: 30,
-        qid: dd[i]
+        qid: dd[i],
+        pointSize: actual_point_size,
       };
     });
     this.html_annotation(annotations);
@@ -215,13 +240,16 @@ export class Zoom {
             .attr('id', 'tooltipcircle')
             .attr('class', 'label')
             .attr('stroke', '#110022')
-            .attr('r', 12)
+            .attr('r', (d) => d.pointSize)
             .attr('fill', (d) => this.scatterplot.dim('color').apply(d.data))
             .attr('cx', (d) => x_(xdim.apply(d.data)))
             .attr('cy', (d) => y_(ydim.apply(d.data))),
 
         (update) =>
-          update.attr('fill', (d) => this.scatterplot.dim('color').apply(d.data)),
+          update
+            .attr('fill', (d) => this.scatterplot.dim('color').apply(d.data))
+            .attr('r', (d) => d.pointSize),
+
         (exit) =>
           exit.call((e) => {
             e.remove();
