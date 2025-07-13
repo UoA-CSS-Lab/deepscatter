@@ -204,7 +204,7 @@ export class Zoom {
 
     const annotations: Annotation[] = data.map((d, i) => {
       // Get size multiplier from size aesthetic if available
-      let size_multiplier = 1.5; // default value
+      let size_multiplier = DEFAULT_SIZE_MULTIPLIER; // default value
 
       const size = this.prefs.encoding.size;
 
