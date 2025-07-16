@@ -204,7 +204,7 @@ export class Zoom {
 
     const annotations: Annotation[] = data.map((d, i) => {
       // Get size multiplier from size aesthetic if available
-      let size_multiplier = (this.scatterplot.dim['size'] as ScaledAesthetic).default_constant as number; // default value
+      let size_multiplier = 1.5; // default value
 
       const size = this.scatterplot.prefs.encoding.size;
 
