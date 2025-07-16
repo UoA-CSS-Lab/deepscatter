@@ -14,7 +14,7 @@ import { Rectangle } from './tile';
 import type { Deeptable } from './Deeptable';
 import type * as DS from './types';
 import type { Scatterplot } from './scatterplot';
-import { PositionalAesthetic, ScaledAesthetic } from './aesthetics/ScaledAesthetic';
+import { PositionalAesthetic } from './aesthetics/ScaledAesthetic';
 import { Qid } from './tixrixqid';
 import { isConstantChannel, isLambdaChannel } from './typing';
 type Annotation = {
