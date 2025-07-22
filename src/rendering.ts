@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 /* eslint-disable no-underscore-dangle */
 import { BaseType, select } from 'd3-selection';
-import { min } from 'd3-array';
 import type { Scatterplot } from './scatterplot';
 import type { Tile } from './tile';
 import type { Zoom } from './interaction';
@@ -172,30 +171,9 @@ export class Renderer {
     // This extends a formula suggested by Ricky Reusser to include
     // discard share.
 
-    const zoom_balance = this.prefs.zoom_balance ?? 1;
-    const { alpha, point_size, max_ix, width, discard_share, height } = this;
-    const k = this.zoom?.transform?.k ?? 1;
+    const { alpha } = this;
     const target_share = alpha / 100;
-    const fraction_of_total_visible = 1 / k ** 2;
-    const pixelRatio = window?.devicePixelRatio || 1;
-
-    const pixel_area = (width * height) / pixelRatio;
-    const total_intended_points = min([
-      max_ix,
-      this.deeptable.highest_known_ix || 1e10,
-    ]) as number;
-
-    const total_points = total_intended_points * (1 - discard_share);
-
-    const size_adjust = Math.exp(Math.log(k) * zoom_balance);
-    const area_of_point =
-      Math.PI * ((size_adjust * point_size) / pixelRatio / 2) ** 2;
-    const target =
-      (target_share * pixel_area) /
-      (total_points * fraction_of_total_visible * area_of_point);
-    // constrain within realistic bounds.
-    // would also be possible to adjust size to meet the goal.
-    return target < 1 / 255 ? 1 / 255 : target;
+    return target_share < 1 / 255 ? 1 / 255 : target_share;
   }
 
   get point_size() {
