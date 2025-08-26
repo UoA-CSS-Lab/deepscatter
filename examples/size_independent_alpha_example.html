@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Size Independent Alpha Example</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        #controls {
+            margin-bottom: 20px;
+        }
+        .control-group {
+            margin: 10px 0;
+        }
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+        input[type="range"] {
+            width: 200px;
+        }
+        #scatterplot {
+            width: 800px;
+            height: 600px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Size Independent Alpha Example</h1>
+    
+    <div id="controls">
+        <div class="control-group">
+            <label for="pointSize">Point Size: <span id="pointSizeValue">5</span></label>
+            <input type="range" id="pointSize" min="1" max="20" value="5" step="0.5">
+        </div>
+        
+        <div class="control-group">
+            <label for="alpha">Alpha (transparency): <span id="alphaValue">40</span>%</label>
+            <input type="range" id="alpha" min="1" max="100" value="40">
+        </div>
+        
+        <div class="control-group">
+            <label for="sizeIndependentAlpha">Size Independent Alpha:</label>
+            <input type="checkbox" id="sizeIndependentAlpha">
+        </div>
+    </div>
+    
+    <div id="scatterplot"></div>
+    
+    <script type="module">
+        import Scatterplot from '../dist/deepscatter.js';
+        
+        // Create sample data
+        const numPoints = 10000;
+        const data = {
+            x: new Float32Array(numPoints),
+            y: new Float32Array(numPoints),
+            color: new Float32Array(numPoints)
+        };
+        
+        // Generate random data
+        for (let i = 0; i < numPoints; i++) {
+            data.x[i] = Math.random() * 100 - 50;
+            data.y[i] = Math.random() * 100 - 50;
+            data.color[i] = Math.random();
+        }
+        
+        // Create arrow table from the data
+        const table = arrow.tableFromArrays(data);
+        
+        // Initialize scatterplot
+        const plot = new Scatterplot('#scatterplot', 800, 600);
+        await plot.plotAPI({
+            arrow_table: table,
+            point_size: 5,
+            alpha: 40,
+            encoding: {
+                x: 'x',
+                y: 'y',
+                color: {
+                    field: 'color',
+                    range: 'viridis'
+                }
+            }
+        });
+        
+        // Add event listeners for controls
+        document.getElementById('pointSize').addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value);
+            document.getElementById('pointSizeValue').textContent = value;
+            plot.plotAPI({ point_size: value });
+        });
+        
+        document.getElementById('alpha').addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            document.getElementById('alphaValue').textContent = value;
+            plot.plotAPI({ alpha: value });
+        });
+        
+        document.getElementById('sizeIndependentAlpha').addEventListener('change', (e) => {
+            plot.plotAPI({ size_independent_alpha: e.target.checked });
+        });
+    </script>
+</body>
+</html>

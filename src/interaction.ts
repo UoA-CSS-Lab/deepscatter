@@ -224,7 +224,7 @@ export class Zoom {
         dx: 0,
         dy: 30,
         qid: dd[i],
-        pointSize: actual_point_size,
+        pointSize: Math.max(actual_point_size, 9),
       };
     });
     this.html_annotation(annotations);
