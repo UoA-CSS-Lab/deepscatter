@@ -209,7 +209,7 @@ export class Zoom {
       const size = this.scatterplot.prefs.encoding.size;
 
       if (isConstantChannel(size)) {
-        size_multiplier *= size.constant;
+        size_multiplier *= 0.15;
       } else if (isLambdaChannel(size)) {
         size_multiplier *= Math.sqrt(Number(d[size.field]));
       }
